@@ -1,36 +1,54 @@
 let express = require("express");
-let router = express.Router();
-let burger = require("../models/burgers.js");
+// let router = express.Router();
+var db = require("../models");
 
-router.get("/", function(req, res) {
-    burger.all(function(data) {
+module.exports = function(app) {
+app.get("/", function(req, res) {
+    
+    db.Burger.findAll({}).then ((data)=>{
+
         var hbsObject = {
             burgers: data
         };
-        console.log(hbsObject);
+        console.log("====" , hbsObject);
         res.render("index", hbsObject);
     });
 });
 
-router.post("/api/burgers", function(req, res) {
+app.get("/api/burger/test", function(req, res) {
+    
+    db.Burger.findAll({}).then ((data)=>{
+
+        var hbsObject = {
+            burgers: data
+        };
+        console.log("====" , hbsObject);
+        res.json(data);
+    });
+});
+
+app.post("/api/burgers", function(req, res) {
     console.log(req.body);
-    burger.insert([
-        req.body.burger_name
-    ], function (result) {
+    db.Burger.create({
+        burger_name: req.body.burger_name
+    }).then (function (result) {
         res.json({id: result.insertId});
     });
 });
 
-router.put("/api/burgers/:id", function(req, res) {
+app.put("/api/burgers/:id", function(req, res) {
     let id = req.params.id
 
-    burger.update(id, function(result) {
-        if (result.changedRows == 0) {
-            return res.status(404).end();
-        } else {
-            res.status(200).end();
+    db.Burger.update({
+        devoured: true
+    }, {
+        where: {
+            id: id
         }
+    }).then (function(data) {
+        res.json(data);
     });
 });
+}
 
-module.exports = router;
+// module.exports = router;
